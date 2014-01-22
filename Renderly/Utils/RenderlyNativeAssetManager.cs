@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 using System.Net;
@@ -17,9 +13,22 @@ namespace Renderly.Utils
     {
         public Stream Get(string path)
         {
-            var uri = new Uri(path);
-            var wc = new WebClient();
-            return wc.OpenRead(uri);
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentException("Null or blank string passed to Get.");
+            }
+
+            try
+            {
+                var uri = new Uri(path);
+                var wc = new WebClient();
+                return wc.OpenRead(uri);
+            }
+            catch (WebException e)
+            {
+                // most likely couldn't retrieve the URI due to timeouts or 404 or something.
+                throw new IOException("Problem encountered retrieving path.", e);
+            }
         }
 
         public bool Delete(string path)
@@ -45,6 +54,7 @@ namespace Renderly.Utils
 
         public string FetchToRandomFilename(string fetchUri, string outputDirectory)
         {
+            CreateFolder(outputDirectory);
             Uri uri = new Uri(fetchUri);
 
             string randomName = Guid.NewGuid().ToString("N");

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 using System.Drawing;
@@ -51,6 +49,9 @@ namespace Renderly.Reporting
             _assetManager = assetManager;
             _configuration = config;
             _results = new List<ReportResult>();
+
+            // We have to create the location where the report and its assets will be stored
+            CreateReportLayout();
         }
 
 
@@ -120,7 +121,6 @@ namespace Renderly.Reporting
         /// <returns></returns>
         private dynamic PersistAssets(TestResult tr)
         {
-            CreateReportLayout();
 
             var images = new List<Tuple<Image, string>>();
 
@@ -147,7 +147,10 @@ namespace Renderly.Reporting
 
             foreach (var image in images)
             {
-                image.Item1.Save(Path.Combine(Configuration.OutputDirectory, Configuration.ReportName, image.Item2), format);
+                if (image.Item1 != null && !string.IsNullOrWhiteSpace(image.Item2))
+                {
+                    image.Item1.Save(Path.Combine(Configuration.OutputDirectory, Configuration.ReportName, image.Item2), format);
+                }
                 //using (var ms = new MemoryStream())
                 //{
                 //    image.Item1.Save(ms, ImageFormat.Jpeg);
